@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Master Challenge</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(135deg,#e8f4fd 0%,#f0f7ff 50%,#e8f4fd 100%);color:#1a1a2e;min-height:100vh;}
+.particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;pointer-events:none;}
+.particle{position:absolute;font-size:13px;opacity:0.12;animation:fall linear infinite;color:#2563eb;}
+@keyframes fall{from{transform:translateY(-20px)}to{transform:translateY(110vh)}}
+.screen{display:none;min-height:100vh;padding:20px;}
+.screen.active{display:block;}
+
+/* HEADER */
+.game-title{text-align:center;padding:30px 20px 18px;}
+.game-title h1{font-size:clamp(24px,5vw,52px);font-weight:900;background:linear-gradient(90deg,#1d4ed8,#2563eb,#0ea5e9,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;}
+.game-title .sub{font-size:13px;color:#64748b;margin-top:6px;letter-spacing:3px;}
+.title-line{width:200px;height:3px;background:linear-gradient(90deg,transparent,#2563eb,transparent);margin:12px auto;}
+
+/* SECTION LABEL */
+.section-label{text-align:center;font-size:13px;color:#64748b;letter-spacing:2px;text-transform:uppercase;margin:22px 0 12px;font-weight:700;}
+
+/* CATEGORIES */
+.categories{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;max-width:700px;margin:0 auto;}
+.cat-card{background:#fff;border:2px solid #e2e8f0;border-radius:20px;padding:24px 32px;cursor:pointer;transition:all 0.3s;text-align:center;min-width:155px;box-shadow:0 4px 15px rgba(0,0,0,0.06);}
+.cat-card:hover{transform:translateY(-6px);box-shadow:0 12px 35px rgba(0,0,0,0.12);}
+.cat-card.python:hover,.cat-card.python.selected{border-color:#3776ab;background:linear-gradient(135deg,#fffbeb,#fef3c7);box-shadow:0 12px 35px rgba(55,118,171,0.2);}
+.cat-card.html:hover,.cat-card.html.selected{border-color:#e44d26;background:linear-gradient(135deg,#fff5f5,#fee2e2);box-shadow:0 12px 35px rgba(228,77,38,0.2);}
+.cat-card.css:hover,.cat-card.css.selected{border-color:#1572b6;background:linear-gradient(135deg,#eff6ff,#dbeafe);box-shadow:0 12px 35px rgba(21,114,182,0.2);}
+.cat-card.selected{transform:translateY(-6px);}
+.cat-logo{font-size:48px;margin-bottom:10px;display:block;}
+.cat-name{font-size:18px;font-weight:900;margin-bottom:4px;}
+.python .cat-name{color:#3776ab;}
+.html .cat-name{color:#e44d26;}
+.css .cat-name{color:#1572b6;}
+.cat-desc{font-size:11px;color:#94a3b8;}
+
+/* DIFFICULTY */
+.difficulty{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:500px;margin:0 auto;}
+.diff-btn{padding:12px 32px;border:2px solid;border-radius:50px;cursor:pointer;font-size:15px;font-weight:900;transition:all 0.2s;background:#fff;font-family:'Segoe UI',sans-serif;}
+.diff-btn.easy{border-color:#16a34a;color:#16a34a;}
+.diff-btn.easy:hover,.diff-btn.easy.selected{background:#16a34a;color:#fff;box-shadow:0 0 20px rgba(22,163,74,0.3);}
+.diff-btn.medium{border-color:#d97706;color:#d97706;}
+.diff-btn.medium:hover,.diff-btn.medium.selected{background:#d97706;color:#fff;box-shadow:0 0 20px rgba(217,119,6,0.3);}
+.diff-btn.hard{border-color:#dc2626;color:#dc2626;}
+.diff-btn.hard:hover,.diff-btn.hard.selected{background:#dc2626;color:#fff;box-shadow:0 0 20px rgba(220,38,38,0.3);}
+
+/* AMOUNT */
+.amount-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.amt-btn{padding:16px 36px;background:#fff;border:2px solid #e2e8f0;border-radius:16px;cursor:pointer;font-size:20px;font-weight:900;color:#2563eb;transition:all 0.2s;font-family:'Segoe UI',sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.06);}
+.amt-btn:hover,.amt-btn.sel{border-color:#2563eb;background:#eff6ff;transform:scale(1.05);box-shadow:0 8px 24px rgba(37,99,235,0.2);}
+
+/* START BTN */
+.start-btn{display:block;margin:24px auto 0;padding:16px 60px;background:linear-gradient(90deg,#2563eb,#0ea5e9);border:none;border-radius:50px;color:#fff;font-size:18px;font-weight:900;cursor:pointer;font-family:'Segoe UI',sans-serif;transition:all 0.2s;box-shadow:0 4px 20px rgba(37,99,235,0.35);}
+.start-btn:hover{transform:scale(1.06);box-shadow:0 8px 30px rgba(37,99,235,0.45);}
+.start-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
+
+/* QUIZ */
+#quizScreen{max-width:800px;margin:0 auto;}
+.quiz-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.quiz-info{display:flex;gap:10px;flex-wrap:wrap;}
+.badge{background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:6px 14px;font-size:13px;color:#2563eb;font-weight:900;}
+.score-badge{background:#f0fdf4;border-color:#bbf7d0;color:#16a34a;}
+.progress-wrap{margin-bottom:18px;}
+.progress-bar{height:8px;background:#e2e8f0;border-radius:10px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#2563eb,#0ea5e9);border-radius:10px;transition:width 0.4s ease;}
+.progress-text{font-size:12px;color:#64748b;text-align:right;margin-top:4px;}
+
+/* QUESTION CARD */
+.q-card{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:28px;margin-bottom:18px;box-shadow:0 4px 20px rgba(0,0,0,0.07);}
+.q-cat-tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:900;margin-bottom:14px;letter-spacing:1px;}
+.q-cat-tag.python{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+.q-cat-tag.html{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;}
+.q-cat-tag.css{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;}
+.q-text{font-size:clamp(15px,2.5vw,19px);font-weight:700;line-height:1.7;color:#1e293b;margin-bottom:20px;}
+.q-code{background:#1e293b;border-radius:10px;padding:14px;font-family:'Courier New',monospace;font-size:13px;color:#7dd3fc;margin-bottom:16px;overflow-x:auto;}
+
+/* OPTIONS */
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:500px){.options{grid-template-columns:1fr;}}
+.option{padding:14px 18px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;font-size:14px;color:#374151;transition:all 0.2s;text-align:left;display:flex;align-items:center;gap:10px;font-family:'Segoe UI',sans-serif;}
+.option:hover:not(.disabled){border-color:#2563eb;background:#eff6ff;color:#1e40af;}
+.option.correct{border-color:#16a34a;background:#f0fdf4;color:#15803d;}
+.option.wrong{border-color:#dc2626;background:#fef2f2;color:#dc2626;}
+.option.show-correct{border-color:#16a34a;background:#f0fdf4;color:#15803d;}
+.option.disabled{cursor:default;}
+.opt-letter{width:28px;height:28px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;flex-shrink:0;color:#64748b;}
+
+/* FEEDBACK */
+.feedback{padding:12px 16px;border-radius:12px;margin-top:14px;font-size:14px;font-weight:700;display:none;}
+.feedback.correct{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;}
+.feedback.wrong{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;}
+
+/* NAV */
+.nav-btns{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;}
+.nav-btn{padding:12px 28px;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;font-size:14px;font-weight:900;background:#fff;color:#64748b;font-family:'Segoe UI',sans-serif;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.nav-btn:hover:not(:disabled){border-color:#2563eb;color:#2563eb;}
+.nav-btn:disabled{opacity:0.3;cursor:not-allowed;}
+.nav-btn.finish{background:linear-gradient(90deg,#16a34a,#22c55e);border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(22,163,74,0.35);}
+
+/* RESULT */
+#resultScreen{max-width:600px;margin:0 auto;text-align:center;padding:30px 20px;}
+.result-trophy{font-size:80px;animation:bounce 1s ease infinite alternate;}
+@keyframes bounce{0%{transform:translateY(0)}100%{transform:translateY(-12px)}}
+.result-title{font-size:clamp(24px,5vw,40px);font-weight:900;margin:16px 0 6px;color:#1e293b;}
+.rank-badge{display:inline-block;padding:8px 24px;border-radius:50px;font-size:16px;font-weight:900;margin-bottom:20px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0;}
+.stat-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.06);}
+.stat-card .sv{font-size:36px;font-weight:900;color:#2563eb;}
+.stat-card .sl{font-size:12px;color:#64748b;margin-top:4px;}
+.pct-circle{width:140px;height:140px;margin:16px auto;position:relative;}
+.pct-circle svg{transform:rotate(-90deg);}
+.pct-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.pct-text .pct-num{font-size:30px;font-weight:900;color:#2563eb;}
+.pct-text .pct-lbl{font-size:11px;color:#64748b;}
+.result-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+.res-btn{padding:13px 32px;border-radius:50px;font-size:15px;font-weight:900;cursor:pointer;border:none;font-family:'Segoe UI',sans-serif;transition:all 0.2s;}
+.res-btn.retry{background:linear-gradient(90deg,#2563eb,#0ea5e9);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,0.3);}
+.res-btn.home{background:#fff;color:#64748b;border:2px solid #e2e8f0;}
+.res-btn:hover{transform:scale(1.06);}
+</style>
+</head>
+<body>
+<div class="particles" id="particles"></div>
+
+<!-- HOME -->
+<div class="screen active" id="homeScreen">
+  <div class="game-title">
+    <h1>💻 CODE MASTER CHALLENGE 💻</h1>
+    <div class="title-line"></div>
+    <div class="sub">TEST YOUR CODING KNOWLEDGE</div>
+  </div>
+
+  <div class="section-label">📚 Select Category</div>
+  <div class="categories">
+    <div class="cat-card python" onclick="selectCat('python',this)">
+      <span class="cat-logo">🐍</span>
+      <div class="cat-name">Python</div>
+      <div class="cat-desc">Programming Language</div>
+    </div>
+    <div class="cat-card html" onclick="selectCat('html',this)">
+      <span class="cat-logo">🌐</span>
+      <div class="cat-name">HTML</div>
+      <div class="cat-desc">Web Structure</div>
+    </div>
+    <div class="cat-card css" onclick="selectCat('css',this)">
+      <span class="cat-logo">🎨</span>
+      <div class="cat-name">CSS</div>
+      <div class="cat-desc">Web Styling</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:26px;">🎯 Select Difficulty</div>
+  <div class="difficulty">
+    <button class="diff-btn easy" onclick="selectDiff('easy',this)">🟢 Easy</button>
+    <button class="diff-btn medium" onclick="selectDiff('medium',this)">🟡 Medium</button>
+    <button class="diff-btn hard" onclick="selectDiff('hard',this)">🔴 Hard</button>
+  </div>
+
+  <div class="section-label" style="margin-top:26px;">🔢 Number of Questions</div>
+  <div class="amount-btns">
+    <button class="amt-btn" onclick="selectAmt(10,this)">🔹 10</button>
+    <button class="amt-btn" onclick="selectAmt(20,this)">🔹 20</button>
+    <button class="amt-btn" onclick="selectAmt(30,this)">🔹 30</button>
+  </div>
+
+  <button class="start-btn" id="startBtn" onclick="startQuiz()" disabled>🚀 START CHALLENGE</button>
+  <div style="height:40px;"></div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="quizScreen">
+  <div style="max-width:800px;margin:0 auto;">
+    <div class="quiz-header">
+      <div class="quiz-info">
+        <div class="badge" id="catBadge">🐍 Python</div>
+        <div class="badge" id="diffBadge">🟢 Easy</div>
+      </div>
+      <div class="badge score-badge">⭐ Score: <span id="scoreDisplay">0</span></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-text" id="progressText">Question 1 of 10</div>
+    </div>
+    <div class="q-card">
+      <div class="q-cat-tag" id="qCatTag">Python</div>
+      <div class="q-text" id="qText"></div>
+      <div class="q-code" id="qCode" style="display:none;"></div>
+      <div class="options" id="optionsDiv"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="nav-btn" id="prevBtn" onclick="prevQ()">← Previous</button>
+      <button class="nav-btn" id="nextBtn" onclick="nextQ()">Next →</button>
+      <button class="nav-btn finish" id="finishBtn" onclick="showResult()" style="display:none;">🏆 Finish</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="resultScreen">
+  <div class="result-trophy" id="trophyEmoji">🏆</div>
+  <div class="result-title" id="resultTitle">Code Master!</div>
+  <div class="rank-badge" id="rankBadge">👑 Code Master</div>
+  <div class="pct-circle">
+    <svg width="140" height="140" viewBox="0 0 140 140">
+      <circle cx="70" cy="70" r="58" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+      <circle cx="70" cy="70" r="58" fill="none" stroke="#2563eb" stroke-width="10" stroke-linecap="round" id="pctArc" stroke-dasharray="364" stroke-dashoffset="364"/>
+    </svg>
+    <div class="pct-text"><div class="pct-num" id="pctNum">0%</div><div class="pct-lbl">Score</div></div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="sv" id="correctCount" style="color:#16a34a;">0</div><div class="sl">✅ Correct</div></div>
+    <div class="stat-card"><div class="sv" id="wrongCount" style="color:#dc2626;">0</div><div class="sl">❌ Wrong</div></div>
+    <div class="stat-card"><div class="sv" id="totalScore">0</div><div class="sl">⭐ Total Score</div></div>
+    <div class="stat-card"><div class="sv" id="timeTaken" style="color:#d97706;">--</div><div class="sl">⏱ Time</div></div>
+  </div>
+  <div class="result-btns">
+    <button class="res-btn retry" onclick="restartQuiz()">🔄 Try Again</button>
+    <button class="res-btn home" onclick="goHome()">🏠 Home</button>
+  </div>
+</div>
+
+<script>
+// Particles
+let codes=['{}','</>','//','&&','||','fn','[]','=>','++','if','for','def','var','let'];
+let pDiv=document.getElementById('particles');
+for(let i=0;i<25;i++){let p=document.createElement('div');p.className='particle';p.textContent=codes[Math.floor(Math.random()*codes.length)];p.style.left=Math.random()*100+'%';p.style.top=Math.random()*100+'%';p.style.animationDuration=(10+Math.random()*15)+'s';p.style.animationDelay=Math.random()*10+'s';pDiv.appendChild(p);}
+
+const QB={
+  easy:[
+    {cat:'python',q:'What is the output of print(2+3)?',opts:['5','23','6','Error'],ans:0},
+    {cat:'python',q:'Which keyword defines a function in Python?',opts:['func','define','def','function'],ans:2},
+    {cat:'python',q:'What data type is x = "Hello"?',opts:['int','float','str','bool'],ans:2},
+    {cat:'python',q:'How do you write a comment in Python?',opts:['// comment','/* comment */','# comment','-- comment'],ans:2},
+    {cat:'python',q:'What is the output of len("Python")?',opts:['5','6','7','Error'],ans:1},
+    {cat:'python',q:'Which of these is a Python list?',opts:['(1,2,3)','[1,2,3]','{1,2,3}','<1,2,3>'],ans:1},
+    {cat:'python',q:'How do you print "Hello" in Python?',opts:['echo "Hello"','console.log("Hello")','print("Hello")','System.out.println("Hello")'],ans:2},
+    {cat:'python',q:'What is 10 % 3 in Python?',opts:['3','1','0','2'],ans:1},
+    {cat:'python',q:'Which function converts string to integer?',opts:['str()','float()','int()','bool()'],ans:2},
+    {cat:'python',q:'What does bool(0) return?',opts:['True','False','0','None'],ans:1},
+    {cat:'html',q:'What does HTML stand for?',opts:['Hyper Text Markup Language','High Tech Modern Language','Hyper Transfer Markup Language','Home Tool Markup Language'],ans:0},
+    {cat:'html',q:'Which tag creates the largest heading?',opts:['<h6>','<h3>','<h1>','<heading>'],ans:2},
+    {cat:'html',q:'Which tag creates a paragraph?',opts:['<para>','<p>','<pg>','<text>'],ans:1},
+    {cat:'html',q:'Which tag inserts an image?',opts:['<image>','<img>','<pic>','<photo>'],ans:1},
+    {cat:'html',q:'Which tag creates a hyperlink?',opts:['<link>','<a>','<href>','<url>'],ans:1},
+    {cat:'html',q:'Which tag creates a line break?',opts:['<break>','<lb>','<br>','<newline>'],ans:2},
+    {cat:'html',q:'Which is the correct bold text tag?',opts:['<bold>','<b>','<strong>','Both b and strong'],ans:3},
+    {cat:'html',q:'Which tag creates an unordered list?',opts:['<ol>','<ul>','<list>','<li>'],ans:1},
+    {cat:'html',q:'Which attribute specifies link destination?',opts:['src','link','href','url'],ans:2},
+    {cat:'html',q:'Which element contains the page title?',opts:['<head>','<title>','<header>','<meta>'],ans:1},
+    {cat:'css',q:'What does CSS stand for?',opts:['Creative Style Sheets','Cascading Style Sheets','Computer Style Sheets','Colorful Style Sheets'],ans:1},
+    {cat:'css',q:'How do you change text color in CSS?',opts:['text-color:red','font-color:red','color:red','text:red'],ans:2},
+    {cat:'css',q:'Which property sets background color?',opts:['bg-color','background','background-color','color-bg'],ans:2},
+    {cat:'css',q:'How do you select all p elements?',opts:['.p','#p','p','*p'],ans:2},
+    {cat:'css',q:'Which property changes font size?',opts:['text-size','font-size','size','text-style'],ans:1},
+    {cat:'css',q:'How do you add a comment in CSS?',opts:['// comment','# comment','/* comment */','<!-- comment -->'],ans:2},
+    {cat:'css',q:'Which property makes text bold?',opts:['font-weight:bold','text-bold:true','bold:yes','font-style:bold'],ans:0},
+    {cat:'css',q:'How do you center text in CSS?',opts:['text-align:center','align:center','center:text','text-center:yes'],ans:0},
+    {cat:'css',q:'Which property makes text italic?',opts:['font-weight','font-style','text-style','font-variant'],ans:1},
+    {cat:'css',q:'Which property sets element width?',opts:['size','length','width','dimension'],ans:2},
+  ],
+  medium:[
+    {cat:'python',q:'What is the output?\nx = [1,2,3]\nprint(x[-1])',opts:['1','2','3','-1'],ans:2},
+    {cat:'python',q:'Which method adds item to end of list?',opts:['add()','push()','append()','insert()'],ans:2},
+    {cat:'python',q:'What does range(5) produce?',opts:['[1,2,3,4,5]','[0,1,2,3,4]','[0,1,2,3,4,5]','[1,2,3,4]'],ans:1},
+    {cat:'python',q:'What is a lambda function?',opts:['A named function','An anonymous function','A class method','A built-in function'],ans:1},
+    {cat:'python',q:'What does the "in" keyword do?',opts:['Creates a loop','Checks membership','Imports module','Defines scope'],ans:1},
+    {cat:'python',q:'What is the output of type(3.14)?',opts:['int','str','float','double'],ans:2},
+    {cat:'python',q:'Which handles exceptions in Python?',opts:['catch-throw','try-except','if-else','try-catch'],ans:1},
+    {cat:'python',q:'What does list.pop() do?',opts:['Adds item','Removes last item','Clears list','Sorts list'],ans:1},
+    {cat:'python',q:'What is __init__ in Python?',opts:['Imports module','Deletes object','Constructor method','Defines class'],ans:2},
+    {cat:'python',q:'What does "is" operator check?',opts:['Value equality','Identity (same object)','Type equality','Size equality'],ans:1},
+    {cat:'html',q:'What is DOCTYPE declaration for?',opts:['Adds styling','Tells browser HTML version','Creates headings','Links CSS'],ans:1},
+    {cat:'html',q:'Which attribute makes input required?',opts:['mandatory','required','must','validate'],ans:1},
+    {cat:'html',q:'What does <meta charset="UTF-8"> do?',opts:['Sets page title','Sets character encoding','Links stylesheet','Sets viewport'],ans:1},
+    {cat:'html',q:'Which tag creates a table row?',opts:['<td>','<th>','<tr>','<table>'],ans:2},
+    {cat:'html',q:'What is the alt attribute in img for?',opts:['Image title','Image size','Alternative text','Image source'],ans:2},
+    {cat:'html',q:'Which input type creates a checkbox?',opts:['type="check"','type="box"','type="checkbox"','type="tick"'],ans:2},
+    {cat:'html',q:'What does <div> stand for?',opts:['Division','Document','Definition','Direction'],ans:0},
+    {cat:'html',q:'Which attribute links a label to input?',opts:['name','id','for','link'],ans:2},
+    {cat:'html',q:'Which HTML tag embeds video?',opts:['<media>','<video>','<movie>','<embed>'],ans:1},
+    {cat:'html',q:'Which tag creates a dropdown menu?',opts:['<dropdown>','<select>','<option>','<list>'],ans:1},
+    {cat:'css',q:'What does "box-model" include?',opts:['margin,border,padding,content','color,font,size,weight','display,float,position,z-index','width,height,top,left'],ans:0},
+    {cat:'css',q:'What is CSS specificity?',opts:['Animation speed','Rule priority system','Font loading','Color mixing'],ans:1},
+    {cat:'css',q:'Which makes element invisible but keeps space?',opts:['display:none','opacity:0','visibility:hidden','Both opacity:0 and visibility:hidden'],ans:3},
+    {cat:'css',q:'What does position:absolute do?',opts:['Positions to viewport','Positions to nearest positioned parent','Keeps element in flow','Positions at page bottom'],ans:1},
+    {cat:'css',q:'What is flexbox used for?',opts:['3D transforms','One-dimensional layout','Grid systems','Color gradients'],ans:1},
+    {cat:'css',q:'Which pseudo-class targets hovered element?',opts:[':active',':focus',':hover',':visited'],ans:2},
+    {cat:'css',q:'What does z-index control?',opts:['Zoom level','Stack order of elements','Zoom animation','Element size'],ans:1},
+    {cat:'css',q:'What does float property do?',opts:['Animates element','Removes element from flow','Changes opacity','Adds shadow'],ans:1},
+    {cat:'css',q:'Which property creates rounded corners?',opts:['corner-radius','border-round','border-radius','round-corner'],ans:2},
+    {cat:'css',q:'What is the default display value of div?',opts:['inline','block','flex','inline-block'],ans:1},
+  ],
+  hard:[
+    {cat:'python',q:'What is the output?\nprint(list(map(lambda x:x**2,[1,2,3])))',opts:['[1,4,9]','[2,4,6]','[1,2,3]','Error'],ans:0},
+    {cat:'python',q:'What does @staticmethod decorator do?',opts:['Creates class variable','Defines method without self/cls','Makes method private','Inherits parent method'],ans:1},
+    {cat:'python',q:'What is a generator in Python?',opts:['A function returning list','A function using yield','A built-in class','A module import'],ans:1},
+    {cat:'python',q:'What is the GIL in Python?',opts:['Global Import Layer','Global Interpreter Lock','General Interface Library','Generic Iteration Loop'],ans:1},
+    {cat:'python',q:'What does __slots__ do in a class?',opts:['Adds more methods','Restricts attributes to save memory','Enables multiple inheritance','Creates thread locks'],ans:1},
+    {cat:'python',q:'What is 0.1 + 0.2 == 0.3 in Python?',opts:['True','False','Error','None'],ans:1},
+    {cat:'python',q:'What does functools.lru_cache do?',opts:['Sorts list','Caches function results','Logs function calls','Creates decorators'],ans:1},
+    {cat:'python',q:'What is MRO in Python?',opts:['Module Resolution Order','Method Resolution Order','Memory Reference Object','Mutable Return Object'],ans:1},
+    {cat:'python',q:'Which is NOT a valid dictionary creation?',opts:['dict(a=1)','{"a":1}','dict(["a",1])','dict([("a",1)])'],ans:2},
+    {cat:'python',q:'What does __enter__ and __exit__ implement?',opts:['Iterator protocol','Comparison protocol','Context manager protocol','Decorator protocol'],ans:2},
+    {cat:'html',q:'What does "defer" in script tag do?',opts:['Blocks rendering','Executes after HTML parsing','Loads script async','Prevents caching'],ans:1},
+    {cat:'html',q:'What does ARIA stand for?',opts:['Automated Response Interface API','Accessible Rich Internet Applications','Advanced Rendering Interface Attributes','Application Runtime Interface Access'],ans:1},
+    {cat:'html',q:'What is the Shadow DOM?',opts:['Hidden iframe','Encapsulated DOM subtree','Server-side rendering','Virtual DOM copy'],ans:1},
+    {cat:'html',q:'What does Content Security Policy do?',opts:['Speeds up loading','Prevents XSS attacks','Enables CORS','Compresses HTML'],ans:1},
+    {cat:'html',q:'What does rel="preload" do?',opts:['Lazy loads images','Preloads critical resources','Delays non-critical CSS','Caches permanently'],ans:1},
+    {cat:'html',q:'What does the crossorigin attribute control?',opts:['Image cropping','CORS requests behavior','Cross-browser compatibility','Currency formats'],ans:1},
+    {cat:'html',q:'What is a Web Component?',opts:['jQuery plugin','Reusable custom HTML element','Bootstrap component','CSS framework element'],ans:1},
+    {cat:'html',q:'What does "nomodule" on script tag do?',opts:['Disables scripts','Fallback for non-ES6 browsers','Removes module scope','Blocks loading'],ans:1},
+    {cat:'html',q:'What is the <template> tag for?',opts:['Creates page template','Holds inert HTML not rendered immediately','Links external template','Defines CSS template'],ans:1},
+    {cat:'html',q:'What does lazy loading in <img> do?',opts:['Blurs while loading','Defers loading until near viewport','Reduces quality','Caches aggressively'],ans:1},
+    {cat:'css',q:'What does CSS contain() do?',opts:['Finds child elements','Creates isolated rendering context','Checks element content','Filters elements'],ans:1},
+    {cat:'css',q:'What is the difference between em and rem?',opts:['No difference','em=parent font-size, rem=root font-size','em=pixels, rem=percentage','em=absolute, rem=relative'],ans:1},
+    {cat:'css',q:'What does will-change property do?',opts:['Changes animation direction','Hints browser about future changes','Enables CSS variables','Resets all properties'],ans:1},
+    {cat:'css',q:'What is CSS Houdini?',opts:['CSS preprocessor','Low-level CSS APIs for browser internals','CSS-in-JS library','CSS animation library'],ans:1},
+    {cat:'css',q:'What does CSS subgrid do?',opts:['Creates sub-animations','Allows children to use parent grid','Divides grid cells','Creates nested flexbox'],ans:1},
+    {cat:'css',q:'What is a stacking context?',opts:['CSS stack overflow','3D layering context for z-index','Animation queue','Flexbox ordering'],ans:1},
+    {cat:'css',q:'What does @layer do in CSS?',opts:['Adds background layers','Manages cascade layer order','Creates z-index layers','Defines animation layers'],ans:1},
+    {cat:'css',q:'What are CSS logical properties?',opts:['Math in CSS','Direction-flow-relative sizing','CSS preprocessor features','Variable declarations'],ans:1},
+    {cat:'css',q:'What does the :is() pseudo-class do?',opts:['Checks element type','Matches any selector in list efficiently','Tests CSS support','Applies identity transform'],ans:1},
+    {cat:'css',q:'What is CSS Paint API?',opts:['Adds paint animation','Allows custom CSS backgrounds via JS','Measures paint time','Creates color gradients'],ans:1},
+  ]
+};
+
+let selCat=null,selDiff=null,selAmt=null,curQ=0,score=0,answers={},questions=[],startTime=null;
+
+function selectCat(cat,el){selCat=cat;document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');checkReady();}
+function selectDiff(diff,el){selDiff=diff;document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');checkReady();}
+function selectAmt(amt,el){selAmt=amt;document.querySelectorAll('.amt-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');checkReady();}
+function checkReady(){document.getElementById('startBtn').disabled=!(selCat&&selDiff&&selAmt);}
+
+function startQuiz(){
+  let pool=QB[selDiff].filter(q=>q.cat===selCat);
+  if(pool.length<selAmt)pool=QB[selDiff];
+  pool=[...pool].sort(()=>Math.random()-0.5);
+  questions=pool.slice(0,selAmt);
+  curQ=0;score=0;answers={};startTime=Date.now();
+  let cn={python:'🐍 Python',html:'🌐 HTML',css:'🎨 CSS'};
+  let dn={easy:'🟢 Easy',medium:'🟡 Medium',hard:'🔴 Hard'};
+  document.getElementById('catBadge').textContent=cn[selCat];
+  document.getElementById('diffBadge').textContent=dn[selDiff];
+  showScreen('quizScreen');renderQ();
+}
+
+function renderQ(){
+  let q=questions[curQ],total=questions.length;
+  document.getElementById('progressFill').style.width=((curQ+1)/total*100)+'%';
+  document.getElementById('progressText').textContent=`Question ${curQ+1} of ${total}`;
+  document.getElementById('scoreDisplay').textContent=score;
+  let tag=document.getElementById('qCatTag');
+  tag.className='q-cat-tag '+q.cat;
+  tag.textContent={python:'🐍 Python',html:'🌐 HTML',css:'🎨 CSS'}[q.cat];
+  document.getElementById('qText').textContent=q.q;
+  let ce=document.getElementById('qCode');
+  if(q.code){ce.style.display='block';ce.textContent=q.code;}else ce.style.display='none';
+  let od=document.getElementById('optionsDiv');od.innerHTML='';
+  let letters=['A','B','C','D'];
+  q.opts.forEach((opt,i)=>{
+    let btn=document.createElement('button');btn.className='option';
+    btn.innerHTML=`<span class="opt-letter">${letters[i]}</span>${opt}`;
+    if(answers[curQ]!==undefined){
+      btn.classList.add('disabled');
+      if(i===q.ans)btn.classList.add('correct');
+      else if(i===answers[curQ])btn.classList.add('wrong');
+    }else btn.onclick=()=>selectAnswer(i,q.ans);
+    od.appendChild(btn);
+  });
+  let fb=document.getElementById('feedback');
+  if(answers[curQ]!==undefined){
+    fb.style.display='block';
+    if(answers[curQ]===q.ans){fb.className='feedback correct';fb.textContent='✅ Correct! Well done!';}
+    else{fb.className='feedback wrong';fb.textContent=`❌ Wrong! Correct answer: ${q.opts[q.ans]}`;}
+  }else fb.style.display='none';
+  document.getElementById('prevBtn').disabled=curQ===0;
+  let isLast=curQ===total-1;
+  document.getElementById('nextBtn').style.display=isLast?'none':'block';
+  document.getElementById('finishBtn').style.display=(isLast&&answers[curQ]!==undefined)||Object.keys(answers).length===total?'block':'none';
+}
+
+function selectAnswer(idx,correct){
+  if(answers[curQ]!==undefined)return;
+  answers[curQ]=idx;
+  document.querySelectorAll('.option').forEach((o,i)=>{
+    o.classList.add('disabled');o.onclick=null;
+    if(i===correct)o.classList.add(idx===correct?'correct':'show-correct');
+    else if(i===idx&&idx!==correct)o.classList.add('wrong');
+  });
+  let fb=document.getElementById('feedback');fb.style.display='block';
+  if(idx===correct){score+=10;fb.className='feedback correct';fb.textContent='✅ Correct! +10 points!';}
+  else{fb.className='feedback wrong';fb.textContent=`❌ Wrong! Correct: ${questions[curQ].opts[correct]}`;}
+  document.getElementById('scoreDisplay').textContent=score;
+  let isLast=curQ===questions.length-1;
+  if(isLast||Object.keys(answers).length===questions.length)document.getElementById('finishBtn').style.display='block';
+}
+
+function nextQ(){if(curQ<questions.length-1){curQ++;renderQ();}}
+function prevQ(){if(curQ>0){curQ--;renderQ();}}
+
+function showResult(){
+  let total=questions.length;
+  let correct=Object.values(answers).filter((a,i)=>a===questions[i].ans).length;
+  let wrong=Object.values(answers).length-correct;
+  let pct=Math.round((correct/total)*100);
+  let elapsed=Math.round((Date.now()-startTime)/1000);
+  document.getElementById('correctCount').textContent=correct;
+  document.getElementById('wrongCount').textContent=wrong;
+  document.getElementById('totalScore').textContent=score;
+  document.getElementById('timeTaken').textContent=`${Math.floor(elapsed/60)}m ${elapsed%60}s`;
+  document.getElementById('pctNum').textContent=pct+'%';
+  document.getElementById('pctArc').style.strokeDashoffset=364-(364*pct/100);
+  let ranks=[{min:0,max:39,emoji:'🥉',title:'Beginner',name:'Beginner',color:'#64748b'},{min:40,max:59,emoji:'🥈',title:'Intermediate',name:'Intermediate',color:'#d97706'},{min:60,max:79,emoji:'🥇',title:'Advanced!',name:'Advanced',color:'#2563eb'},{min:80,max:100,emoji:'👑',title:'Code Master!',name:'Code Master',color:'#7c3aed'}];
+  let rank=ranks.find(r=>pct>=r.min&&pct<=r.max)||ranks[0];
+  document.getElementById('trophyEmoji').textContent=rank.emoji;
+  document.getElementById('resultTitle').textContent=rank.title;
+  let rb=document.getElementById('rankBadge');
+  rb.textContent=rank.emoji+' '+rank.name;
+  rb.style.background=rank.color+'18';rb.style.border=`2px solid ${rank.color}`;rb.style.color=rank.color;
+  showScreen('resultScreen');
+}
+
+function restartQuiz(){startQuiz();}
+function goHome(){showScreen('homeScreen');}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+</script>
+</body>
+</html>
